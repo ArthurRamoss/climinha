@@ -1,0 +1,1628 @@
+{
+  "name": "agente wpp audio msg separada",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bufferdememoria",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        680
+      ],
+      "id": "fe14bab4-5a72-43ef-8d45-fa4c8d85c080",
+      "name": "Webhook",
+      "webhookId": "ac59dd64-0491-4148-aff9-4f997a2c5abc"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d8552d32-340b-42f4-ba8d-c52313f0f117",
+              "name": "From",
+              "value": "={{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "238b60a7-3431-4468-8656-023bbcdae49f",
+              "name": "Instance",
+              "value": "={{ $json.body.instance }}",
+              "type": "string"
+            },
+            {
+              "id": "2acff7c9-0cc0-4513-bebd-c53e74ddc986",
+              "name": "Mensagem",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "53599530-dade-4d09-a122-a1d9c4c2f9e0",
+              "name": "MensagemID",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "dfcc01f7-319d-4359-a23e-2e4ee01144f2",
+              "name": "Nome da pessoa",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "36a9b764-e885-4b7c-8bc8-85a092643b50",
+              "name": "tipo da mensagem",
+              "value": "={{ $json.body.data.messageType }}",
+              "type": "string"
+            },
+            {
+              "id": "d118d7b6-4a23-4757-92f0-4c037a054aca",
+              "name": "mimetipe msg",
+              "value": "={{ $json.body.data.message.audioMessage.mimetype }}",
+              "type": "string"
+            },
+            {
+              "id": "7f802131-30b3-4336-8f2b-c3ba5a9f40fc",
+              "name": "base64 da msg",
+              "value": "={{ $json.body.data.message.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -900,
+        680
+      ],
+      "id": "52a7bfeb-fb8b-442c-8676-eba6b739f2ee",
+      "name": "dados1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['Mensagem '] }}",
+        "options": {
+          "systemMessage": "=1. Role (Papel)\nVocê é o \"Climinha\", um especialista em meteorologia amigável e atencioso que opera no WhatsApp. Sua personalidade é a de um amigo confiável que não apenas lê dados, mas os interpreta para dar conselhos genuinamente úteis. Você é metódico, usando sua capacidade de \"pensar\" para planejar suas ações, mas sua comunicação com o usuário é sempre natural, gentil e conversada. Você não é um robô.\n\n2. Consciência de Contexto\n- **Horário:** Você sabe a hora atual, é {{ new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }} no Brasil. Use-a para saudar o usuário corretamente (Bom dia, Boa tarde, Boa noite) e para contextualizar suas dicas.\n- **Localização:** Preste atenção em como o usuário se refere ao local. Se ele diz \"aqui em São Paulo\", ele está lá. Se ele diz \"lá em Curitiba\", ele não está. Adapte sua resposta para refletir isso (\"O tempo aí em São Paulo...\" vs \"O tempo lá em Curitiba...\").\n\nVocê está em um chat no WhatsApp. A formatação da sua resposta é a parte mais importante para a experiência do usuário.\n\n**DIRETRIZ PRINCIPAL E INEGOCIÁVEL: O CICLO DE PENSAMENTO**\nSua qualidade é medida pela sua capacidade de pensar antes de agir. Você é OBRIGADO a usar a ferramenta `Think` em dois momentos críticos:\n1.  **ANTES de chamar qualquer outra ferramenta:** Para declarar seu plano de ação.\n2.  **DEPOIS de receber o resultado de uma ferramenta:** Para analisar o que recebeu e planejar o próximo passo.\nFALHAR em seguir este ciclo resultará em uma resposta de baixa qualidade. Não há exceções. Você não responde ao usuário diretamente após usar uma ferramenta sem antes usar `Think` para analisar o resultado.\n\n- **QUEBRAS DE LINHA NATURAIS:** Pule linha apenas para separar ideias ou no final de uma frase completa. **NUNCA quebre uma frase no meio** só para caber no limite de 4 linhas. É melhor ter uma linha um pouco mais longa do que uma quebra de linha feia e artificial.\n- **PROIBIDO PARÁGRAFOS:** O uso de duas quebras de linha (`\\n\\n`) é proibido, e o uso de \"///\\n///\" É EXTRAMEMAMENTE PROIBIDO, isso quebra o fluxo de mensagens\n- **O SEPARADOR /// É SAGRADO:** Ele NUNCA deve ter uma quebra de linha antes ou depois dele.\n  - **CERTO:** ...uma boa pedida!///Quer que eu te avise...\n  - **ERRADO:** ...uma boa pedida!\\n///\\nQuer que eu te avise...\n- **LIMITE DE 5 LINHAS:** Cada balão de mensagem não pode exceder 5 linhas.\n\n3. Task (Lógica de Execução com Pensamento)\nSua missão é fornecer uma previsão do tempo precisa e um conselho útil, seguindo rigorosamente este fluxo:\n\n- **ETAPA 1 (Reconhecer Usuário):** Ao receber QUALQUER mensagem, sua PRIMEIRA AÇÃO é usar `consultar_preferencias_usuario` com o `remoteJid` do remetente para verificar se você já o conhece.\n\n- **ETAPA 2 (Analisar Perfil e Intenção):**\n  - **CASO A (Usuário Novo):** A ferramenta não retorna nada. Prossiga para a ETAPA 3 para fornecer a previsão do tempo.\n  - **CASO B (Usuário Existente):** A ferramenta retorna os dados do usuário.\n    - Cumprimente-o pelo nome (Ex: \"Opa, Ramos! Beleza?\").\n    - Analise a mensagem: ele quer uma *nova previsão* ou quer *editar suas preferências* (ex: \"desativar notificações\", \"mudar meu horário\")?\n    - Se for um pedido de edição, vá para a **ETAPA 7**.\n    - Se for um pedido de previsão, prossiga para a **ETAPA 3**.\n\n- **ETAPA 3 (Buscar Coordenadas):** Se o pedido for por uma cidade, use `obter_coordenadas_cidade`. Lide com resultados múltiplos pedindo para o usuário escolher.\n\n- **ETAPA 4 (Consultar Previsão):** Com as coordenadas, use `consultar_previsao_tempo_por_coordenadas`.\n\n- **ETAPA 5 (Interpretar e Responder):** Analise os dados da previsão e construa sua resposta com a previsão e uma dica útil em dois balões, como nos exemplos.\n\n- **ETAPA 6 (Oferta de Notificação Inteligente):**\n  - **Para usuários novos:** Após a previsão, pergunte se desejam receber notificações.\n  - **Para usuários existentes:** VERIFIQUE se a cidade consultada JÁ ESTÁ na lista de `cidadesMonitoradas`.\n    - Se **SIM**, NÃO OFEREÇA NADA. Apenas finalize a conversa (Ex: \"Qualquer outra coisa, é só chamar!\").\n    - Se **NÃO**, pergunte se ele deseja ADICIONAR alertas para essa nova cidade.\n  - Se a resposta for positiva, inicie o fluxo de cadastro: **ETAPA 8**.\n\n- **ETAPA 7 (Gerenciar Preferências de Usuário Existente):**\n  - Confirme a ação com o usuário (Ex: \"Vi aqui que suas notificações estão ativas. Quer desativá-las, certo?\").\n  - Após a confirmação, use a ferramenta `editar_preferencias_usuario` com o `remoteJid` e o parâmetro a ser alterado (Ex: `notificacaoAtiva: false`).\n  - Informe que a alteração foi feita com sucesso.\n\n- **ETAPA 8 (Apresentar Opções de Cadastro):** Apresente as opções: 1. Diariamente, 2. Semanalmente, 3. Apenas Alertas (para eventos como chuvas fortes, tempestades ou calor extremo).\n\n- **ETAPA 9 (Processar Escolha):**\n  - Se escolher \"Apenas Alertas\" (ou \"Adverso\"), confirme e use `salvar_preferencias_usuario` (com `horarioNotificacao` vazio).\n  - Se escolher \"Diariamente\" ou \"Semanalmente\", confirme e pergunte o horário.\n\n- **ETAPA 10 (Finalizar Cadastro):** Com o horário em mãos, confirme tudo e use `salvar_preferencias_usuario` com todos os dados.\n\n\n4. Ferramentas Disponíveis (Suas Ações)\n- **consultar_preferencias_usuario:** Use esta ferramenta PRIMEIRO para buscar os dados de um usuário. Se retornar vazio, o usuário é novo.\n- **salvar_preferencias_usuario:** Salva um NOVO usuário ou adiciona uma nova cidade para um usuário existente.\n- **editar_preferencias_usuario:** EDITA as preferências de um usuário que JÁ EXISTE. Use para ativar/desativar alertas, mudar horários, etc.\n- **obter_coordenadas_cidade:** Converte um nome de cidade em coordenadas.\n- **consultar_previsao_tempo_por_coordenadas:** Retorna a previsão do tempo para as coordenadas.\n- **Think:** Sua ferramenta para raciocinar, planejar e interpretar dados antes de responder.\n\n\n5. Regras e Instruções Finais\n- REGRA 1 (Reconhecer Primeiro): É OBRIGATÓRIO tentar reconhecer o usuário com `consultar_preferencias_usuario` antes de qualquer outra ação.\n- REGRA 2 (Pensar para Interpretar): É obrigatório usar `Think` para analisar os dados da previsão (ETAPA 5) e criar uma sugestão relevante, não genérica.\n- REGRA 3 (Ordem das Ferramentas): A ordem das ferramentas é sagrada.\n- REGRA 4 (Sugestões Dinâmicas): Suas dicas devem ser baseadas na sua análise. Se não houver nada notável (tempo estável e bom), apenas comente sobre o dia agradável.\n- REGRA 5 (Formato é Rei): Respeite as regras de formatação (quebra de linha real, máximo de 4 linhas, separador ///) para garantir uma boa experiência no WhatsApp.\n- REGRA 6 (Lidar com Ambiguidade): Sua prioridade MÁXIMA é resolver ambiguidades de localização antes de prosseguir.\n- REGRA 7 (Não ser repetitivo): Se um usuário já monitora uma cidade, não ofereça para monitorá-la de novo.\n- REGRA 8 (Confirmar antes de Editar): Sempre confirme com o usuário a mudança que ele pediu antes de usar a ferramenta `editar_preferencias_usuario`.\n\n\n6. Exemplos Práticos (Seu Guia Definitivo de Estilo e Formatação)\n\nSua resposta final deve SEMPRE seguir o estilo e a estrutura destes exemplos. Note que NÃO HÁ um espaço em branco entre o título e a lista.\n\n---\n**EXEMPLO 1: Cenário com mudança de tempo (frio e chuva).**\n\n// PENSAMENTO DO AGENTE (Think): \"A previsão para Curitiba mostra que a temperatura vai cair bastante e a chance de chuva aumenta muito no fim da tarde. É uma mudança importante. Minha dica precisa ser sobre se preparar para isso.\"\n\n// RESPOSTA FINAL GERADA:\nPrevisão para Curitiba: 🥶\n- Agora: 18°C (Sensação de 17°C)\n- Próximas horas: A temperatura cai para 13°C com 80% de chuva.\n///\nSe liga, curitibano! \nAquele frio com chuva tá chegando com tudo no fim da tarde. \nÉ bom já deixar o casaco e o guarda-chuva na mão!\n///\nQuer que eu te avise se aparecer algum alerta mais sério pra cá?\n\n---\n**EXEMPLO 2: Cenário com tempo estável e agradável.**\n\n// PENSAMENTO DO AGENTE (Think): \"A previsão para Recife é de sol e calor estável, sem chance de chuva. É um dia ótimo. Minha dica será positiva, incentivando a aproveitar o dia.\"\n\n// RESPOSTA FINAL GERADA:\nPrevisão para Recife: ☀️\n- Agora: 28°C (Sensação de 30°C)\n- Próximas horas: O tempo segue firme, com sol e poucas nuvens.\n- Alem disso, a humidade está baixa, em 55%. O sol vai brilhar o dia todo!\n///\nDia perfeito por aí, hein?\nO tempo tá ótimo pra aproveitar uma praia ou qualquer rolê ao ar livre.\nPode ir sem medo! 😉\n///\nQuer que eu te avise se o tempo ameaçar virar?\n\nEste exemplo mostra o fluxo COMPLETO após o usuário aceitar receber notificações.\n\n// O agente já entregou a previsão e perguntou sobre notificações.\n// USUÁRIO RESPONDE: \"sim, quero sim\"\n\n// PENSAMENTO DO AGENTE (Think): \"O usuário aceitou. Preciso apresentar as opções de frequência.\"\n// RESPOSTA FINAL GERADA:\nQue ótimo! Tenho algumas opções pra você.\nComo prefere receber as notificações?\n///\n1. Diariamente\n2. Semanalmente\n3. Apenas em situações de alerta (chuvas fortes, tempestades, calor extremo, etc.)\n\nÉ só me dizer o número!\n///\n// USUÁRIO RESPONDE: \"1\"\n\n// PENSAMENTO DO AGENTE (Think): \"Ele escolheu 'Diariamente'. Agora preciso perguntar o horário.\"\n// RESPOSTA FINAL GERADA:\nCombinado, alerta diário! 👍\nE que horas seria um bom momento pra eu te enviar a previsão todos os dias?\n///\n// USUÁRIO RESPONDE: \"pode ser umas 8 da manha\"\n\n// PENSAMENTO DO AGENTE (Think): \"Perfeito. Preferência: Diario, Horário: 08:00. Vou usar a ferramenta 'salvar_preferencias_usuario' com todos os dados.\"\n// RESPOSTA FINAL GERADA:\nFechado! Configurei seu alerta diário para São Paulo às 08:00.\nSe quiser adicionar outra cidade ou mudar algo, é só me chamar! 😉\n\n**EXEMPLO 3: Edição de preferência para um usuário existente.**\n\n// HORA ATUAL: 10:00\n// MENSAGEM DO USUÁRIO: \"climinha, desativa minhas notificações por um tempo\"\n\n// PENSAMENTO DO AGENTE (Think): \"Ok, recebi uma mensagem. Primeiro, vou usar `consultar_preferencias_usuario` para ver quem é.\"\n// (Executa a ferramenta e recebe os dados do usuário, incluindo `notificacaoAtiva: true`)\n// PENSAMENTO DO AGENTE (Think): \"Entendi. É o Carlos e as notificações dele estão ativas. Ele pediu pra desativar. Vou confirmar e depois usar a ferramenta de edição.\"\n\n// RESPOSTA FINAL GERADA:\nOpa, Carlos! Bom dia.\nVi aqui que suas notificações estão ativas.\nVocê quer desativá-las por enquanto, certo?///\n// USUÁRIO RESPONDE: \"isso mesmo\"\n\n// PENSAMENTO DO AGENTE (Think): \"Confirmado. Vou usar `editar_preferencias_usuario` com os parâmetros `remoteJid: 'ID_do_Carlos'` e `notificacaoAtiva: false`.\"\n// (Executa a ferramenta de edição)\n\n// RESPOSTA FINAL GERADA:\nProntinho! Desativei suas notificações.\nQuando quiser ligar de novo, é só me avisar. Se precisar de alguma previsão, tô por aqui! 👍```"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1632,
+        680
+      ],
+      "id": "603eec8e-632a-4fe6-8347-9212fbde0083",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1300,
+        900
+      ],
+      "id": "26084b16-e7e6-4eaa-adb9-3a6faf29f26e",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "aBdAmgNiTtXCqx1g",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('dados1').first().json.Instance }}",
+        "remoteJid": "={{ $('dados1').first().json.From }}",
+        "messageText": "={{ $json.mensagens }}",
+        "options_message": {
+          "delay": 3500
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        3440,
+        680
+      ],
+      "id": "80b18de8-1400-45ff-86b4-7c5d557de732",
+      "name": "Evolution API5",
+      "credentials": {
+        "evolutionApi": {
+          "id": "2JtLC0ehMVvk6aSZ",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        900
+      ],
+      "id": "203589bd-43b1-4f51-a579-f71089b78436",
+      "name": "Think1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5ca57b6c-4ab3-43d2-9c43-2fbd6004597d",
+              "name": "resposta",
+              "value": "={{ $('AI Agent1').item.json.output.replace(\"\\n///\", \" ///\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2340,
+        680
+      ],
+      "id": "505add60-9198-425b-a560-cd7a5f5a810c",
+      "name": "separador "
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6cd12c83-aa77-4cc6-9801-8652d3b1f5fd",
+              "name": "mensagens",
+              "value": "={{ $json.resposta.replace(/\\n\\n/g, '\\n').split(\"///\").map(item => item.trim()) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2560,
+        680
+      ],
+      "id": "32278a94-13e6-4238-8d04-de2b25f233b5",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "mensagens",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2780,
+        680
+      ],
+      "id": "fa5a44b4-fbb2-47ed-81c2-c0920dde92db",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "batchSize": "=4",
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3000,
+        680
+      ],
+      "id": "c9dbc516-7e22-41d3-8764-e25f3e823056",
+      "name": "Loop Over Items1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3220,
+        605
+      ],
+      "id": "f3403da4-f766-43b0-aa5b-ee444515550d",
+      "name": "Wait1",
+      "webhookId": "c5446455-a3d3-4f62-af3d-0d27a26d2c65"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        420,
+        780
+      ],
+      "id": "54ab8828-ebcd-4b14-9d20-69b9d9cdb2dd",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "aBdAmgNiTtXCqx1g",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "be79b5bb-0c5b-4946-80c6-937ca0a425b1",
+              "name": "Mensagem ",
+              "value": "={{ $('dados1').item.json.Mensagem }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        580
+      ],
+      "id": "9a08f496-b6c1-4408-bf09-1132b62bce4e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fc4391c6-5b30-4e68-9aa5-0ecbc8f33ab9",
+              "name": "Mensagem",
+              "value": "=Conteudo do audio: {{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        780
+      ],
+      "id": "fd826720-7b9f-4875-a076-0673007fb7fb",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        860,
+        680
+      ],
+      "id": "683e875d-76f9-4900-99fa-be31ef0bc99f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d6262c7a-ada2-428c-b4c5-143a826576c9",
+              "name": "Mensagem ",
+              "value": "={{ $json['Mensagem '] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1080,
+        680
+      ],
+      "id": "958b38ab-826e-4c57-97e8-97edf4dd14fa",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "{{ $('dados1').item.json.From }}",
+        "sessionTTL": 1800,
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        1420,
+        900
+      ],
+      "id": "f150ef9b-8393-4181-8fcf-87762735effb",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "E81XkGelkyVCNfyy",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('dados1').item.json['tipo da mensagem'] }}",
+                    "rightValue": "conversation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a8529e1c-889a-49a0-831b-31f5fd190818"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c87be2fd-23ff-469f-8150-941fff51f77d",
+                    "leftValue": "={{ $('dados1').item.json['tipo da mensagem'] }}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            }
+          ]
+        },
+        "options": {
+          "allMatchingOutputs": false
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -240,
+        680
+      ],
+      "id": "63acee7a-f7b4-42df-b8df-522cd337ddf2",
+      "name": "Message Type1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "get-media-base64",
+        "instanceName": "={{ $('dados1').item.json.Instance }}",
+        "messageId": "={{ $('dados1').item.json.MensagemID }}"
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        780
+      ],
+      "id": "f3a415be-014c-4704-ba3f-c2e00afd4007",
+      "name": "Evolution API",
+      "credentials": {
+        "evolutionApi": {
+          "id": "2JtLC0ehMVvk6aSZ",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data.base64",
+        "options": {
+          "fileName": "file.ogg",
+          "mimeType": "={{ $json.data.mimetype }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        780
+      ],
+      "id": "773a1857-c79c-47d5-bded-7f41ccff09b7",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -680,
+        680
+      ],
+      "id": "bbf27040-c493-4eb5-a968-7019596b9989",
+      "name": "setVazio"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use esta ferramenta SEMPRE PRIMEIRO para converter o nome de uma cidade em uma lista de possíveis coordenadas (latitude e longitude). Ela pode retornar uma ou mais localizações. O input é o nome da cidade enviado pelo usuário.\n\nO nome da cidade deve estar SEM ACENTOs\n\nexemplo São Paulo, vira \"sao paulo\"\n\npesquise sempre pela cidade, se tiver CERTEZA que do pais que é, você pode colocar um ,sigla do pais, tipo ,BR\n\n\n",
+        "url": "http://api.openweathermap.org/geo/1.0/direct",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "=={{ $fromAI('parameters0_Value', '').normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\").toLowerCase().replace() }}"
+            },
+            {
+              "name": "appid",
+              "value": "ec963ad89982f8eec8b42dc062f2f7b3"
+            }
+          ]
+        },
+        "options": {},
+        "optimizeResponse": true,
+        "dataField": "="
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1780,
+        900
+      ],
+      "id": "d17fcc2f-c8a1-4894-ae6f-93fa6019b73d",
+      "name": "obter_coodernadas_cidade",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use esta ferramenta DEPOIS de obter as coordenadas exatas com a ferramenta 'obter_coordenadas_cidade'. Ela recebe latitude e longitude e retorna a previsão do tempo de agora e das proximas 24 horas\n\n    horario (dt_txt): É a data e a hora para a qual a previsão do tempo se refere.\n\n    temperatura (main.temp): É a temperatura real prevista.\n\n    sensacao (main.feels_like): Corresponde à sensação térmica, que é como a temperatura é percebida pelo corpo humano, considerando fatores como o vento e a umidade.\n\n    umidade (main.humidity): Indica a umidade relativa do ar em porcentagem.\n\n    condicao (weather[0].description): Descreve as condições do céu, como \"nublado\", \"céu limpo\", etc.\n\n    chance_chuva (pop): É a probabilidade de precipitação (chuva). O valor original (0.0 a 1.0) foi convertido para uma porcentagem de 0 a 100.",
+        "url": "https://api.openweathermap.org/data/2.5/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "appid",
+              "value": "ec963ad89982f8eec8b42dc062f2f7b3"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            },
+            {
+              "name": "lat",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters3_Value', ``, 'string') }}"
+            },
+            {
+              "name": "lon",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters4_Value', ``, 'string') }}"
+            },
+            {
+              "name": "cnt",
+              "value": "=8"
+            }
+          ]
+        },
+        "options": {},
+        "optimizeResponse": true,
+        "dataField": "="
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1660,
+        1080
+      ],
+      "id": "b2e05de8-97df-4bf9-9bee-6e015c42b243",
+      "name": "consultar_previsao_tempo_por_coordenada",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "read-messages",
+        "instanceName": "={{ $('dados1').item.json.Instance }}",
+        "remoteJid": "={{ $('dados1').item.json.From }}",
+        "messageId": "={{ $('dados1').item.json.MensagemID }}"
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        680
+      ],
+      "id": "2a4ad1b0-be34-4625-87b8-e06c92a00ba8",
+      "name": "Evolution API6",
+      "credentials": {
+        "evolutionApi": {
+          "id": "2JtLC0ehMVvk6aSZ",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1FWMiQaYu9r1CNfIIq5N9EpV1_DTYsUnQofvYT6ewtFA",
+          "mode": "list",
+          "cachedResultName": "climinha"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "remoteJid": "={{ $('dados1').item.json.From }}",
+            "NomeUsuario": "={{ $('dados1').item.json['Nome da pessoa'] }}",
+            "cidadesMonitoradas": "={{ $fromAI('cidade') }}",
+            "preferenciaNotificacao ": "={{ $fromAI('preferenciaNotificacao') }}",
+            "horarioNotificacao ": "={{ $fromAI('horarioNotificacao') }}",
+            "ultimaAtualizacao ": "={{ new Date().toISOString() }}",
+            "NotificacaoAtiva": true
+          },
+          "matchingColumns": [
+            "remoteJid"
+          ],
+          "schema": [
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "NomeUsuario",
+              "displayName": "NomeUsuario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cidadesMonitoradas",
+              "displayName": "cidadesMonitoradas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferenciaNotificacao ",
+              "displayName": "preferenciaNotificacao ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "horarioNotificacao ",
+              "displayName": "horarioNotificacao ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ultimaAtualizacao ",
+              "displayName": "ultimaAtualizacao ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NotificacaoAtiva",
+              "displayName": "NotificacaoAtiva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8be31fb6-3922-477b-80f2-3ccdcc93aa0d",
+      "name": "salvar_preferencias_usuario",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        1900,
+        1060
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ia2X0kRHCwqmdSD6",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1FWMiQaYu9r1CNfIIq5N9EpV1_DTYsUnQofvYT6ewtFA",
+          "mode": "list",
+          "cachedResultName": "climinha"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "remoteJid": "={{ $('dados1').item.json.From }}",
+            "NomeUsuario": "={{ $fromAI('nomeUsuario') }}",
+            "cidadesMonitoradas": "={{ JSON.stringify([{'cidade': $fromAI('cidade'), 'lat': $fromAI('lat'), 'lon': $fromAI('lon')}]) }}",
+            "preferenciaNotificacao ": "={{ $fromAI('preferenciaNotificacao') }}",
+            "horarioNotificacao ": "={{ $fromAI('horarioNotificacao') }}",
+            "ultimaAtualizacao ": "={{ new Date().toISOString() }}",
+            "NotificacaoAtiva": "={{ $fromAI('notificacaoAtiva') }}"
+          },
+          "matchingColumns": [
+            "remoteJid"
+          ],
+          "schema": [
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "NomeUsuario",
+              "displayName": "NomeUsuario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cidadesMonitoradas",
+              "displayName": "cidadesMonitoradas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferenciaNotificacao ",
+              "displayName": "preferenciaNotificacao ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "horarioNotificacao ",
+              "displayName": "horarioNotificacao ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ultimaAtualizacao ",
+              "displayName": "ultimaAtualizacao ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NotificacaoAtiva",
+              "displayName": "NotificacaoAtiva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0a80e68a-e14e-4228-aed4-0fbdfb175780",
+      "name": "editar_preferencias_usuario",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        2020,
+        900
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ia2X0kRHCwqmdSD6",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FWMiQaYu9r1CNfIIq5N9EpV1_DTYsUnQofvYT6ewtFA",
+          "mode": "list",
+          "cachedResultName": "climinha"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FWMiQaYu9r1CNfIIq5N9EpV1_DTYsUnQofvYT6ewtFA/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "remoteJid",
+              "lookupValue": "={{ $('dados1').item.json.From }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d0ae4a62-d3cf-49ea-bbac-36ae89fc627c",
+      "name": "consultar_preferencias_usuario",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        2160,
+        1080
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ia2X0kRHCwqmdSD6",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1140,
+        1480
+      ],
+      "id": "4b5c678b-344c-4019-9530-41ad88cda978",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FWMiQaYu9r1CNfIIq5N9EpV1_DTYsUnQofvYT6ewtFA",
+          "mode": "list",
+          "cachedResultName": "climinha",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FWMiQaYu9r1CNfIIq5N9EpV1_DTYsUnQofvYT6ewtFA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FWMiQaYu9r1CNfIIq5N9EpV1_DTYsUnQofvYT6ewtFA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -920,
+        1480
+      ],
+      "id": "26214792-dccf-4746-8e6c-a2d5aa9d9eb2",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ia2X0kRHCwqmdSD6",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -700,
+        1480
+      ],
+      "id": "121c90a9-941d-4969-acd2-36fb515318d5",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4ca5e3e0-32e4-4f0b-88fe-dde6909feaae",
+              "name": "=dataHoraAtual",
+              "value": "={{ new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) }}",
+              "type": "string"
+            },
+            {
+              "id": "a1659138-cc57-4781-b6c1-c171fb06dd91",
+              "name": "=dadosUsuario",
+              "value": "={{ JSON.stringify($json) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -480,
+        1400
+      ],
+      "id": "96d65bc2-e386-4038-9591-89fda079907e",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "wpbiz",
+        "remoteJid": "={{ $('Google Sheets').item.json.remoteJid }}",
+        "messageText": "={{ $json.message.content }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        500,
+        1400
+      ],
+      "id": "7c9c0231-e2a1-485b-a7eb-fc976097efc7",
+      "name": "Evolution API1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "2JtLC0ehMVvk6aSZ",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        1500
+      ],
+      "id": "97860f38-d52a-4e72-b1cb-022cf43c691c",
+      "name": "Wait",
+      "webhookId": "9b4e1f53-1a04-4443-8b75-6bdb451182cb"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "# 1. ROLE (PAPEL) E MISSÃO\nVocê é o \"Climinha-Notificador\", a versão proativa e autônoma do agente Climinha. Sua missão é executar uma verificação de rotina para cada usuário, agindo como um amigo atencioso que manda uma mensagem útil no momento certo. Você mantém a personalidade amigável, gentil e conversada do Climinha, transformando dados brutos em conselhos práticos e bem-humorados.\n\n# 2. CONTEXTO DA EXECUÇÃO (INPUT)\nPara cada execução, você receberá um bloco de dados com a hora atual e as preferências de um usuário. O formato será este:\n- **`dataHoraAtual`**: A data e hora exatas de agora (ex: \"11/07/2025 08:01:15\").\n- **`dadosUsuario`**: Um objeto JSON com as preferências do usuário.\n  - Exemplo de dadosUsuario: `{\"remoteJid\":\"5511...\",\"NomeUsuario\":\"Ramos\",\"cidade\":\"sao paulo\",\"preferenciaNotificacao\":\"Diariamente\",\"horarioNotificacao\":\"08:00\",\"NotificacaoAtiva\":\"TRUE\"}`\n  - Note que o campo `NomeUsuario` pode estar vazio ou ausente.\n\n# 3. TASK: LÓGICA DE EXECUÇÃO EM 4 ETAPAS\nSiga este fluxo rigorosamente. Use a ferramenta `Think` para planejar seus passos.\n\n**ETAPA 1: Análise de Agendamento (Decidir se hoje é dia de agir)**\n- Analise os `dadosUsuario` e a `dataHoraAtual`.\n- **CASO \"Diariamente\":** A notificação deve ser processada APENAS SE a HORA de `dataHoraAtual` for igual à HORA em `horarioNotificacao`.\n- **CASO \"Semanalmente\":** A notificação deve ser processada APENAS SE o dia da semana atual for Segunda-feira E a HORA atual for igual à HORA em `horarioNotificacao`.\n- **CASO \"Apenas Alertas\":** Prossiga para a próxima etapa, pois alertas são checados a toda hora.\n- **Se nenhuma das condições de tempo for atendida, sua tarefa termina aqui. Responda IMEDIATAMENTE com `[NO_NOTIFICATION_NEEDED]`**\n\n---\n**ETAPA 2: Busca de Coordenadas (Descobrir onde fica a cidade)**\n- Se a ETAPA 1 foi positiva, use a ferramenta `obter_coordenadas_cidade` com o valor do campo `cidade` dos `dadosUsuario`.\n- Se a ferramenta não retornar nenhuma coordenada, a cidade pode ser inválida. Encerre o processo respondendo com `[NO_NOTIFICATION_NEEDED]`.\n\n---\n**ETAPA 3: Busca da Previsão do Tempo (Ver como está o tempo lá)**\n- Use a `lat` e `lon` obtidas na ETAPA 2 como input para a ferramenta `consultar_previsao_tempo_por_coordenadas`.\n\n---\n**ETAPA 4: Análise, Interpretação e Geração da Mensagem (A Alma do Climinha)**\n- Analise os dados da previsão recebidos.\n- **Para \"Diariamente\" ou \"Semanalmente\":**\n    - Construa uma resposta em **dois balões de mensagem**, separados por `///`.\n    - **Primeiro Balão (Os Dados):** Crie um resumo detalhado e bem formatado, como nos seus melhores dias. Inclua temperatura atual, máxima/mínima, condição do céu, chance de chuva e umidade.\n    - **Segundo Balão (A Dica):** Interprete os dados! Crie uma dica criativa, pessoal e útil. Se o tempo está bom, sugira algo ao ar livre. Se está frio e chuvoso, sugira algo aconchegante.\n    - **Exemplo de Resposta (Dia Bom):**\n      Previsão para São Paulo: ☀️\n      - Agora: 18°C (Sensação de 17°C)\n      - Durante o dia: A temperatura sobe para 25°C, sem chance de chuva!\n      - Umidade do ar: Em torno de 60%.\n      ///\n      Opa, Ramos, bom dia! O tempo aí em São Paulo está pedindo pra sair de casa! Perfeito para uma caminhada ou um almoço ao ar livre. Pode deixar o casaco pesado em casa hoje! 😉\n\n- **Para \"Apenas Alertas\":**\n    - Procure por condições extremas (ex: `pop` > 0.7, `weather.main` contém \"Thunderstorm\", `main.temp` > 35°C).\n    - **Se encontrar uma condição extrema**, crie um alerta em dois balões.\n    - **Exemplo de Alerta:**\n      Alerta de Temporal para Belo Horizonte: ⛈️\n      - Condição: Tempestades se formando\n      - Chance de chuva: Aumentando para 85% nas próximas horas.\n      - Vento: Rajadas de até 40km/h.\n      ///\n      Se liga, Ramos! Tem um temporal se formando aí pra mais tarde. Melhor garantir que as janelas estejam fechadas e evitar sair se não for estritamente necessário, beleza? Cuidado extra no trânsito!\n    - **Se não encontrar condição extrema, encerre respondendo com `[NO_NOTIFICATION_NEEDED]`**.\n\n# 4. FERRAMENTAS DISPONÍVEIS\n1.  **`obter_coordenadas_cidade`**: USE ESTA PRIMEIRO para obter latitude e longitude a partir do nome da cidade.\n2.  **`consultar_previsao_tempo_por_coordenadas`**: USE ESTA EM SEGUNDO LUGAR, com o resultado da primeira ferramenta.\n3.  **`Think`**: OBRIGATÓRIO para planejar e analisar.\n\n# 5. FORMATO DA SAÍDA (OUTPUT)\n- **SE UMA NOTIFICAÇÃO DEVE SER ENVIADA:** Sua saída final deve ser uma **ÚNICA STRING DE TEXTO** contendo a mensagem completa a ser enviada no WhatsApp.\n- **SE NENHUMA NOTIFICAÇÃO FOR NECESSÁRIA:** Sua saída final deve ser **EXATAMENTE** a string `[NO_NOTIFICATION_NEEDED]`.",
+              "role": "=system"
+            },
+            {
+              "content": "={{ $json.dataHoraAtual }}\n{{ $json.dadosUsuario }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -260,
+        1400
+      ],
+      "id": "ced104e9-dd77-418f-9b70-ba1b718ed204",
+      "name": "OpenAI1",
+      "retryOnFail": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "aBdAmgNiTtXCqx1g",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use esta ferramenta SEMPRE PRIMEIRO para converter o nome de uma cidade em uma lista de possíveis coordenadas (latitude e longitude). Ela pode retornar uma ou mais localizações. O input é o nome da cidade enviado pelo usuário.\n\nO nome da cidade deve estar SEM ACENTOs\n\nexemplo São Paulo, vira \"sao paulo\"\n\npesquise sempre pela cidade, se tiver CERTEZA que do pais que é, você pode colocar um ,sigla do pais, tipo ,BR\n\n\n",
+        "url": "http://api.openweathermap.org/geo/1.0/direct",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "=={{ $fromAI('parameters0_Value', '').normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\").toLowerCase().replace() }}"
+            },
+            {
+              "name": "appid",
+              "value": "ec963ad89982f8eec8b42dc062f2f7b3"
+            }
+          ]
+        },
+        "options": {},
+        "optimizeResponse": true,
+        "dataField": "="
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        1780
+      ],
+      "id": "36099d08-51a5-4807-accf-640cff5581d2",
+      "name": "obter_coodernadas_cidade1",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use esta ferramenta DEPOIS de obter as coordenadas exatas com a ferramenta 'obter_coordenadas_cidade'. Ela recebe latitude e longitude e retorna a previsão do tempo de agora e das proximas 24 horas\n\n    horario (dt_txt): É a data e a hora para a qual a previsão do tempo se refere.\n\n    temperatura (main.temp): É a temperatura real prevista.\n\n    sensacao (main.feels_like): Corresponde à sensação térmica, que é como a temperatura é percebida pelo corpo humano, considerando fatores como o vento e a umidade.\n\n    umidade (main.humidity): Indica a umidade relativa do ar em porcentagem.\n\n    condicao (weather[0].description): Descreve as condições do céu, como \"nublado\", \"céu limpo\", etc.\n\n    chance_chuva (pop): É a probabilidade de precipitação (chuva). O valor original (0.0 a 1.0) foi convertido para uma porcentagem de 0 a 100.",
+        "url": "https://api.openweathermap.org/data/2.5/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "appid",
+              "value": "ec963ad89982f8eec8b42dc062f2f7b3"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            },
+            {
+              "name": "lat",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters3_Value', ``, 'string') }}"
+            },
+            {
+              "name": "lon",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters4_Value', ``, 'string') }}"
+            },
+            {
+              "name": "cnt",
+              "value": "=8"
+            }
+          ]
+        },
+        "options": {},
+        "optimizeResponse": true,
+        "dataField": "="
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -200,
+        1780
+      ],
+      "id": "89da3ea7-8078-41e1-9ea4-9da33fb9653f",
+      "name": "consultar_previsao_tempo_por_coordenada1",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dec3a628-e24f-46ed-8c9b-a3e406f9aa3d",
+              "leftValue": "={{ $json.message.content }}",
+              "rightValue": "[NO_NOTIFICATION_NEEDED]",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "1d5c8cd8-b505-4a86-9396-d3bdb8971d33",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        100,
+        1400
+      ],
+      "id": "3cdc5bcf-4e0b-40a7-be3c-a35d0f99ed95",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        340,
+        1240
+      ],
+      "id": "0f2d3e78-af96-4935-8a11-676366c0f87f",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        120,
+        1780
+      ],
+      "id": "461a0cf5-8e82-45aa-8022-299f844d8155",
+      "name": "Think"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "dados1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dados1": {
+      "main": [
+        [
+          {
+            "node": "setVazio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "separador ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evolution API5": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "separador ": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Evolution API5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Type1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evolution API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evolution API": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "setVazio": {
+      "main": [
+        [
+          {
+            "node": "Evolution API6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_previsao_tempo_por_coordenada": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obter_coodernadas_cidade": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evolution API6": {
+      "main": [
+        [
+          {
+            "node": "Message Type1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "salvar_preferencias_usuario": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "editar_preferencias_usuario": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_preferencias_usuario": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evolution API1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_previsao_tempo_por_coordenada1": {
+      "ai_tool": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obter_coodernadas_cidade1": {
+      "ai_tool": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evolution API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1d78aa27-269d-43e2-85c3-a4a6c2a05238",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "25432290557c3966a199849a6354fd8548294ebd7fa37c4c7acfba56b95d4f6c"
+  },
+  "id": "gGusGOso0k05EM76",
+  "tags": []
+}
