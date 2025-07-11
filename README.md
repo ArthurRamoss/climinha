@@ -1,6 +1,6 @@
 # MVP - Previsão do Tempo no WhatsApp com n8n
 
-Este projeto é um chatbot de previsão do tempo para WhatsApp, desenvolvido como um MVP (Mínimo Produto Viável) para um desafio de recrutamento. O chatbot, apelidado de "Climinha", permite que os usuários solicitem a previsão do tempo para qualquer cidade e optem por receber notificações sobre mudanças climáticas significativas.
+Este projeto é um chatbot de previsão do tempo para WhatsApp, desenvolvido como um MVP (Mínimo Produto Viável). O chatbot, apelidado de "Climinha", permite que os usuários solicitem a previsão do tempo para qualquer cidade e optem por receber notificações sobre mudanças climáticas significativas.
 
 ## Visão Geral do Projeto
 
